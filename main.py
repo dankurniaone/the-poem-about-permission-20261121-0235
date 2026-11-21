@@ -52,7 +52,17 @@ def main() -> int:
     path = os.path.join(out, "entry.txt")
     with open(path, "w", encoding="utf-8", newline="") as f:
         f.write(text)
-    print(f"wrote {len(text)} characters to {path}")
+    # Read the file back and confirm it is exactly the poem and still
+    # inside the gate: a silent write failure must not pass as success.
+    with open(path, encoding="utf-8", newline="") as f:
+        written = f.read()
+    if written != text:
+        print("entry.txt does not match the poem", file=sys.stderr)
+        return 1
+    if not MIN_CHARS <= len(written) <= MAX_CHARS or not written.strip():
+        print("entry.txt fails the gate on read-back", file=sys.stderr)
+        return 1
+    print(f"wrote and verified {len(written)} characters at {path}")
     return 0
 
 
